@@ -343,8 +343,8 @@
 
         // --- SUB-COMPONENTE: CARD DE PRODUTO ---
         const ProductCard = ({ product, onAdd }) => {
-            const [sizeTop, setSizeTop] = useState('G');
-            const [sizeBottom, setSizeBottom] = useState('42');
+            const [sizeTop, setSizeTop] = useState('');
+            const [sizeBottom, setSizeBottom] = useState('');
 
             const handleAdd = () => {
                 onAdd({
