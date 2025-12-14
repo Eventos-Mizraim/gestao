@@ -44,7 +44,7 @@
 
         .cinzel { font-family: 'Cinzel', serif; }
 
-        /* Cores Utilitárias */
+        /* Utilitários */
         .text-gold { color: var(--gold) !important; }
         .text-orange { color: var(--orange) !important; }
         .bg-gold { background-color: var(--gold); color: #000; }
@@ -59,12 +59,25 @@
             padding: 12px 30px;
             clip-path: polygon(10% 0, 100% 0, 100% 80%, 90% 100%, 0 100%, 0 20%);
             transition: all 0.3s;
+            width: 100%;
         }
         .btn-action:hover {
-            transform: scale(1.05);
+            transform: scale(1.02);
             box-shadow: 0 0 20px rgba(255, 69, 0, 0.4);
             color: white;
         }
+        
+        .btn-add {
+            background-color: var(--gold);
+            color: black;
+            font-weight: bold;
+            border: none;
+            padding: 8px 16px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+        .btn-add:hover { background-color: #fff; }
 
         /* Cards e Painéis */
         .l-card {
@@ -77,17 +90,34 @@
             transition: transform 0.2s;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        .l-card:hover { transform: translateY(-2px); border-color: var(--orange); }
-
+        
+        .product-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .product-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 1px solid #333;
+        }
+        .product-body { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; }
+        
         /* Navbar */
         .l-navbar {
             background-color: rgba(0,0,0,0.95);
             border-bottom: 2px solid var(--gold);
             padding: 15px 0;
             backdrop-filter: blur(10px);
+            z-index: 1000;
         }
 
-        /* Steps do Wizard */
+        /* Wizard Steps */
         .step-indicator {
             display: flex;
             justify-content: space-between;
@@ -110,16 +140,22 @@
         .step.active { background: var(--gold); border-color: var(--gold); color: black; box-shadow: 0 0 15px var(--gold-dim); }
         .step.completed { background: var(--orange); border-color: var(--orange); color: white; }
 
+        /* Cart Table */
+        .cart-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .cart-table th { text-align: left; color: #888; font-size: 0.8rem; border-bottom: 1px solid #333; padding: 5px; }
+        .cart-table td { padding: 10px 5px; border-bottom: 1px solid #222; color: #ddd; font-size: 0.9rem; }
+        .btn-trash { background: none; border: none; color: #d63333; cursor: pointer; }
+        .btn-trash:hover { color: #ff0000; }
+
         /* Inputs */
         .form-control, .form-select {
-            background-color: #1a1a1a; border: 1px solid #333; color: white;
-            border-radius: 2px; padding: 10px;
+            background-color: #0f0f0f; border: 1px solid #333; color: white;
+            border-radius: 2px; padding: 8px;
         }
         .form-control:focus, .form-select:focus {
             background-color: #222; border-color: var(--gold); color: white; box-shadow: none;
         }
 
-        /* Animações */
         .fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -131,30 +167,63 @@
         const { useState, useEffect } = React;
 
         // --- CONFIGURAÇÃO GOOGLE APPS SCRIPT ---
-        // COLE O LINK DO SEU WEB APP AQUI (Instruções no final)
-        const SCRIPT_URL = "LINK_DO_SEU_WEB_APP_AQUI"; 
+        const SCRIPT_URL = "INSIRA_SEU_LINK_DO_WEB_APP_AQUI"; 
 
         // --- DADOS ---
         const AVISOS = [
-            { id: 1, title: 'MISSÃO CUMPRIDA', date: 'HOJE', desc: 'Gratidão aos 26 homens que aceitaram o chamado. A jornada apenas começou.', important: true },
-            { id: 2, title: 'PRAZO UNIFORMES', date: 'DOMINGO', desc: 'O pedido do kit tático é obrigatório via sistema.', important: true },
-            { id: 3, title: 'Reunião de Alinhamento', date: 'SEX 20H', desc: 'Convocação geral para coordenadores.', important: false }
+            { id: 1, title: 'MISSÃO CUMPRIDA', date: 'HOJE', desc: 'Gratidão aos 26 homens que aceitaram o chamado.', important: true },
+            { id: 2, title: 'PRAZO UNIFORMES', date: 'DOMINGO', desc: 'Pedido obrigatório via sistema.', important: true },
+            { id: 3, title: 'Reunião Geral', date: 'SEX 20H', desc: 'Convocação para coordenadores.', important: false }
         ];
 
         const PRODUCTS = [
-            { id: 'kit', name: 'KIT TÁTICO COMPLETO', price: 179.90, desc: '2ª Pele + Calça + Balaclava + Patch', sizes: true },
-            { id: 'balaclava', name: 'Balaclava Tática', price: 30.00, desc: 'Proteção Essencial (Obrigatório)', sizes: false },
-            { id: 'pele', name: '2ª Pele Térmica', price: 70.00, desc: 'Manga Longa UV50+', sizes: true },
-            { id: 'calca', name: 'Calça Ripstop', price: 90.00, desc: 'Reforço no joelho', sizes: true },
+            { 
+                id: 'kit', 
+                name: 'KIT TÁTICO COMPLETO', 
+                price: 179.90, 
+                desc: '2ª Pele + Calça + Balaclava + Patch', 
+                image: 'https://eventos-mizraim.github.io/gestao/2pele.jpeg', // Usando 2pele como representativa ou substitua
+                hasTopSize: true, 
+                hasBottomSize: true 
+            },
+            { 
+                id: 'balaclava', 
+                name: 'Balaclava Tática', 
+                price: 30.00, 
+                desc: 'Proteção Essencial (Obrigatório)', 
+                image: 'https://eventos-mizraim.github.io/gestao/balaclava.jpeg',
+                hasTopSize: false, 
+                hasBottomSize: false 
+            },
+            { 
+                id: 'pele', 
+                name: '2ª Pele Térmica', 
+                price: 70.00, 
+                desc: 'Manga Longa UV50+', 
+                image: 'https://eventos-mizraim.github.io/gestao/2pele.jpeg',
+                hasTopSize: true, 
+                hasBottomSize: false 
+            },
+            { 
+                id: 'calca', 
+                name: 'Calça Ripstop', 
+                price: 90.00, 
+                desc: 'Reforço no joelho', 
+                image: 'https://eventos-mizraim.github.io/gestao/calca.jpeg',
+                hasTopSize: false, 
+                hasBottomSize: true 
+            },
         ];
+
+        const SIZES_TOP = ['P', 'M', 'G', 'GG', 'G1', 'G2'];
+        const SIZES_BOTTOM = ['38', '40', '42', '44', '46', '48'];
 
         // --- COMPONENTES ---
 
-        // HEADER
         const Header = ({ setView, onAdminClick }) => (
             <nav className="l-navbar sticky-top">
                 <div className="container d-flex justify-content-between align-items-center">
-                    <div className="d-flex align-items-center gap-3 cursor-pointer" onClick={() => setView('home')} style={{cursor:'pointer'}}>
+                    <div className="d-flex align-items-center gap-3" onClick={() => setView('home')} style={{cursor:'pointer'}}>
                         <img src="https://eventos-mizraim.github.io/gestao/Eventos.png" height="50" alt="Logo" />
                         <div className="d-none d-md-block">
                             <h4 className="m-0 brand-font text-gold">LEGENDÁRIOS</h4>
@@ -173,16 +242,78 @@
             </nav>
         );
 
-        // VIEW: HOME (DASHBOARD AVISOS)
+        // --- SUB-COMPONENTE: CARD DE PRODUTO ---
+        const ProductCard = ({ product, onAdd }) => {
+            const [sizeTop, setSizeTop] = useState('G');
+            const [sizeBottom, setSizeBottom] = useState('42');
+
+            const handleAdd = () => {
+                onAdd({
+                    ...product,
+                    selectedTop: product.hasTopSize ? sizeTop : null,
+                    selectedBottom: product.hasBottomSize ? sizeBottom : null,
+                    uniqueId: Date.now() + Math.random() // ID único para o carrinho
+                });
+                
+                // Feedback visual simples
+                const btn = document.getElementById(`btn-${product.id}`);
+                const originalText = btn.innerText;
+                btn.innerText = "ADICIONADO!";
+                btn.classList.add('bg-success', 'text-white');
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.remove('bg-success', 'text-white');
+                }, 1000);
+            };
+
+            return (
+                <div className="col-md-6 col-lg-3 mb-4">
+                    <div className="product-card">
+                        <img src={product.image} className="product-img" alt={product.name} />
+                        <div className="product-body">
+                            <h6 className="text-white fw-bold mb-1">{product.name}</h6>
+                            <p className="text-muted small mb-2" style={{lineHeight:'1.2'}}>{product.desc}</p>
+                            <div className="text-gold fw-bold mb-3">R$ {product.price.toFixed(2)}</div>
+                            
+                            <div className="mt-auto">
+                                {product.hasTopSize && (
+                                    <div className="mb-2">
+                                        <label className="text-muted small d-block">Tamanho (Superior)</label>
+                                        <select className="form-select form-select-sm" value={sizeTop} onChange={e => setSizeTop(e.target.value)}>
+                                            {SIZES_TOP.map(s => <option key={s} value={s}>{s}</option>)}
+                                        </select>
+                                    </div>
+                                )}
+                                {product.hasBottomSize && (
+                                    <div className="mb-2">
+                                        <label className="text-muted small d-block">Tamanho (Calça)</label>
+                                        <select className="form-select form-select-sm" value={sizeBottom} onChange={e => setSizeBottom(e.target.value)}>
+                                            {SIZES_BOTTOM.map(s => <option key={s} value={s}>{s}</option>)}
+                                        </select>
+                                    </div>
+                                )}
+                                <button id={`btn-${product.id}`} className="btn-add w-100 mt-2" onClick={handleAdd}>
+                                    ADICIONAR <i className="material-icons align-middle" style={{fontSize:'16px'}}>add_shopping_cart</i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // VIEW: HOME
         const Home = ({ setView }) => (
             <div className="container py-5 fade-in">
                 <div className="text-center mb-5">
                     <img src="https://eventos-mizraim.github.io/gestao/MIZRAIM_LIMITE%20DUPLO.png" className="img-fluid mb-3" style={{maxHeight: '150px'}} />
                     <h1 className="text-gold display-4 fw-bold brand-font">BEM-VINDOS</h1>
                     <p className="lead text-white cinzel">"O ferro afia o ferro, e um homem afia o outro."</p>
-                    <button className="btn-action mt-3" onClick={() => setView('wizard')}>
-                        INICIAR JORNADA <i className="material-icons align-middle ms-2">arrow_forward</i>
-                    </button>
+                    <div className="d-flex justify-content-center gap-3 mt-4">
+                        <button className="btn-action" style={{maxWidth:'300px'}} onClick={() => setView('wizard')}>
+                            INICIAR JORNADA <i className="material-icons align-middle ms-2">arrow_forward</i>
+                        </button>
+                    </div>
                 </div>
 
                 <div className="row g-4">
@@ -202,14 +333,14 @@
             </div>
         );
 
-        // VIEW: WIZARD (FLUXO UNIFICADO)
+        // VIEW: WIZARD
         const Wizard = ({ setView }) => {
             const [step, setStep] = useState(1);
             const [formData, setFormData] = useState({ numero: '', nome: '', cep: '', endereco: '', curso: 'nao', certificado: '' });
-            const [cart, setCart] = useState({});
+            const [cartItems, setCartItems] = useState([]); // Array de itens
             const [isSubmitting, setIsSubmitting] = useState(false);
 
-            // FUNÇÕES STEP 1 (DADOS)
+            // FUNÇÕES STEP 1
             const handleCep = async (e) => {
                 const cep = e.target.value.replace(/\D/g, '');
                 setFormData({...formData, cep});
@@ -222,42 +353,49 @@
                 }
             };
 
-            // FUNÇÕES STEP 2 (LOJA)
-            const handleQty = (id, delta) => {
-                const current = cart[id] || { qty: 0, sizeTop: 'G', sizeBottom: '42' };
-                const newQty = Math.max(0, current.qty + delta);
-                setCart({ ...cart, [id]: { ...current, qty: newQty } });
+            // FUNÇÕES STEP 2 (CARRINHO ARRAY)
+            const addToCart = (item) => {
+                setCartItems([...cartItems, item]);
             };
-            const handleSize = (id, type, val) => {
-                const current = cart[id] || { qty: 0, sizeTop: 'G', sizeBottom: '42' };
-                setCart({ ...cart, [id]: { ...current, [type]: val } });
+
+            const removeFromCart = (uniqueId) => {
+                setCartItems(cartItems.filter(item => item.uniqueId !== uniqueId));
             };
+
+            const cartTotal = cartItems.reduce((acc, item) => acc + item.price, 0);
+
             const validateShop = () => {
-                const balaclavas = (cart['kit']?.qty || 0) + (cart['balaclava']?.qty || 0);
-                if (balaclavas < 1) {
-                    Swal.fire({icon:'warning', title:'ITEM OBRIGATÓRIO', text:'Adicione pelo menos 1 Balaclava (ou Kit).', background:'#111', color:'#fff', confirmButtonColor:'#D4AF37'});
+                // Verifica se tem Balaclava (seja item avulso ou dentro do Kit)
+                const hasBalaclava = cartItems.some(i => i.id === 'balaclava' || i.id === 'kit');
+                
+                if (!hasBalaclava) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'ITEM OBRIGATÓRIO',
+                        text: 'Você precisa adicionar pelo menos 1 Balaclava (Avulsa ou no Kit).',
+                        confirmButtonColor: '#D4AF37', background: '#111', color: '#fff'
+                    });
                     return false;
                 }
                 return true;
             };
 
-            // FUNÇÕES STEP 3 (CHECKOUT & ENVIO)
-            const total = Object.keys(cart).reduce((acc, key) => acc + (PRODUCTS.find(p => p.id === key).price * cart[key].qty), 0);
-            
+            // FUNÇÕES STEP 3
             const enviarDados = async () => {
                 setIsSubmitting(true);
-                const payload = { ...formData, carrinho: cart, total: total.toFixed(2), data_hora: new Date().toISOString() };
+                const payload = { 
+                    ...formData, 
+                    carrinho: cartItems.map(i => `${i.name} (${i.selectedTop || ''} ${i.selectedBottom || ''})`).join(', '), 
+                    total: cartTotal.toFixed(2), 
+                    data_hora: new Date().toISOString() 
+                };
                 
-                // Simulação de envio para Google Apps Script
                 try {
-                    // Para ativar, descomente a linha abaixo quando configurar o Script
                     // await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-                    
                     setTimeout(() => {
                         setIsSubmitting(false);
-                        window.location.href = `mailto:eventosmizraim.lgndzs@gmail.com?subject=PAGAMENTO - ${formData.nome}&body=Segue comprovante. Total: R$ ${total.toFixed(2)}`;
-                    }, 2000);
-
+                        window.location.href = `mailto:eventosmizraim.lgndzs@gmail.com?subject=PAGAMENTO - ${formData.nome}&body=Segue comprovante anexo.%0D%0A%0D%0APedido:%0D%0A${payload.carrinho}%0D%0A%0D%0ATotal: R$ ${payload.total}`;
+                    }, 1500);
                 } catch (e) {
                     setIsSubmitting(false);
                     Swal.fire('Erro', 'Tente novamente', 'error');
@@ -266,16 +404,16 @@
 
             return (
                 <div className="container py-4 fade-in">
-                    <div className="col-lg-8 mx-auto">
+                    <div className="col-lg-10 mx-auto">
                         <div className="step-indicator">
                             <div className={`step ${step >= 1 ? 'active' : ''} ${step > 1 ? 'completed' : ''}`}>1</div>
                             <div className={`step ${step >= 2 ? 'active' : ''} ${step > 2 ? 'completed' : ''}`}>2</div>
                             <div className={`step ${step >= 3 ? 'active' : ''} ${step > 3 ? 'completed' : ''}`}>3</div>
                         </div>
 
-                        <div className="l-card">
-                            {/* STEP 1: DADOS */}
-                            {step === 1 && (
+                        {/* STEP 1: DADOS */}
+                        {step === 1 && (
+                            <div className="l-card col-md-8 mx-auto">
                                 <form onSubmit={(e) => { e.preventDefault(); setStep(2); }}>
                                     <h3 className="text-white mb-4 brand-font"><span className="text-gold">01.</span> DADOS DO COMBATENTE</h3>
                                     <div className="row g-3">
@@ -307,76 +445,100 @@
                                         <button type="submit" className="btn-action">AVANÇAR <i className="material-icons align-middle">arrow_forward</i></button>
                                     </div>
                                 </form>
-                            )}
+                            </div>
+                        )}
 
-                            {/* STEP 2: LOJA */}
-                            {step === 2 && (
-                                <div>
-                                    <h3 className="text-white mb-4 brand-font"><span className="text-gold">02.</span> ARSENAL & EQUIPAMENTO</h3>
-                                    <div className="bg-dark p-3 mb-4 rounded border border-secondary">
-                                        {PRODUCTS.map(prod => {
-                                            const inCart = cart[prod.id] || { qty: 0, sizeTop: 'G', sizeBottom: '42' };
-                                            return (
-                                                <div key={prod.id} className="row align-items-center mb-3 pb-3 border-bottom border-secondary">
-                                                    <div className="col-md-5">
-                                                        <h5 className={`m-0 ${prod.id === 'kit' ? 'text-gold fw-bold' : 'text-white'}`}>{prod.name}</h5>
-                                                        <small className="text-muted">{prod.desc}</small>
-                                                    </div>
-                                                    <div className="col-md-4 text-center">
-                                                        {inCart.qty > 0 && prod.sizes && (
-                                                            <div className="d-flex gap-1 justify-content-center">
-                                                                {['kit','pele'].includes(prod.id) && <select className="form-select form-select-sm w-auto" value={inCart.sizeTop} onChange={e => handleSize(prod.id, 'sizeTop', e.target.value)}>{['P','M','G','GG','G1'].map(s=><option key={s}>{s}</option>)}</select>}
-                                                                {['kit','calca'].includes(prod.id) && <select className="form-select form-select-sm w-auto" value={inCart.sizeBottom} onChange={e => handleSize(prod.id, 'sizeBottom', e.target.value)}>{['38','40','42','44','46','48'].map(s=><option key={s}>{s}</option>)}</select>}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="col-md-3 d-flex justify-content-end gap-3 align-items-center">
-                                                        <div className="text-gold font-monospace">R$ {prod.price.toFixed(2)}</div>
-                                                        <div className="btn-group btn-group-sm">
-                                                            <button className="btn btn-outline-light" onClick={() => handleQty(prod.id, -1)}>-</button>
-                                                            <button className="btn btn-light disabled text-dark fw-bold" style={{width:'30px'}}>{inCart.qty}</button>
-                                                            <button className="btn btn-outline-light" onClick={() => handleQty(prod.id, 1)}>+</button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )
-                                        })}
-                                    </div>
-                                    <div className="d-flex justify-content-between align-items-center">
-                                        <h4 className="text-white m-0">Total: <span className="text-gold">R$ {total.toFixed(2)}</span></h4>
-                                        <div>
-                                            <button className="btn btn-outline-secondary me-2" onClick={() => setStep(1)}>VOLTAR</button>
-                                            <button className="btn-action" onClick={() => { if(validateShop()) setStep(3); }}>PAGAMENTO</button>
+                        {/* STEP 2: LOJA */}
+                        {step === 2 && (
+                            <div>
+                                <h3 className="text-white mb-4 brand-font text-center"><span className="text-gold">02.</span> ARSENAL & EQUIPAMENTO</h3>
+                                
+                                {/* Lista de Produtos */}
+                                <div className="row">
+                                    {PRODUCTS.map(prod => (
+                                        <ProductCard key={prod.id} product={prod} onAdd={addToCart} />
+                                    ))}
+                                </div>
+
+                                {/* Resumo do Carrinho */}
+                                <div className="l-card mt-3">
+                                    <h5 className="text-white border-bottom border-secondary pb-2 mb-3"><i className="material-icons align-middle text-gold">shopping_cart</i> RESUMO DO PEDIDO</h5>
+                                    
+                                    {cartItems.length === 0 ? (
+                                        <p className="text-muted text-center py-3">Seu carrinho está vazio.</p>
+                                    ) : (
+                                        <div className="table-responsive">
+                                            <table className="cart-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Item</th>
+                                                        <th>Tamanhos</th>
+                                                        <th>Preço</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {cartItems.map((item) => (
+                                                        <tr key={item.uniqueId}>
+                                                            <td>{item.name}</td>
+                                                            <td>
+                                                                {item.selectedTop && <span className="badge bg-dark border border-secondary me-1">{item.selectedTop}</span>}
+                                                                {item.selectedBottom && <span className="badge bg-dark border border-secondary">{item.selectedBottom}</span>}
+                                                            </td>
+                                                            <td className="text-gold">R$ {item.price.toFixed(2)}</td>
+                                                            <td className="text-end">
+                                                                <button className="btn-trash" onClick={() => removeFromCart(item.uniqueId)}>
+                                                                    <i className="material-icons" style={{fontSize:'18px'}}>delete</i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+
+                                    <div className="d-flex justify-content-between align-items-center mt-4 pt-3 border-top border-secondary">
+                                        <h4 className="text-white m-0">Total: <span className="text-gold">R$ {cartTotal.toFixed(2)}</span></h4>
+                                        <div className="d-flex gap-2">
+                                            <button className="btn btn-outline-secondary" onClick={() => setStep(1)}>VOLTAR</button>
+                                            <button className="btn-action" style={{width:'auto'}} onClick={() => { if(validateShop()) setStep(3); }}>
+                                                PAGAMENTO <i className="material-icons align-middle ms-2">payments</i>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
-                            )}
+                            </div>
+                        )}
 
-                            {/* STEP 3: CHECKOUT */}
-                            {step === 3 && (
-                                <div className="text-center">
-                                    <h3 className="text-white mb-2 brand-font"><span className="text-gold">03.</span> CONFIRMAÇÃO</h3>
-                                    <p className="text-muted">Chave PIX Aleatória</p>
-                                    
-                                    <div className="bg-dark p-4 rounded border border-gold d-inline-block mb-4 cursor-pointer" onClick={() => {navigator.clipboard.writeText("7bb7efc3-1a3c-4bc5-9e58-ab1b78e8909c"); Swal.fire('Copiado!','','success')}}>
-                                        <h2 className="text-gold mb-3">R$ {total.toFixed(2)}</h2>
-                                        <code className="text-white d-block mb-2 text-break">7bb7efc3-1a3c-4bc5-9e58-ab1b78e8909c</code>
-                                        <small className="text-orange text-uppercase fw-bold">[CLIQUE PARA COPIAR]</small>
-                                    </div>
-
-                                    <div className="alert alert-secondary text-start mx-auto" style={{maxWidth:'500px'}}>
-                                        <small>1. Faça o PIX.<br/>2. Clique no botão abaixo para abrir seu e-mail.<br/>3. Anexe o comprovante e envie.</small>
-                                    </div>
-
-                                    <div className="mt-4">
-                                        <button className="btn btn-outline-secondary me-2" onClick={() => setStep(2)}>VOLTAR</button>
-                                        <button className="btn-action" onClick={enviarDados} disabled={isSubmitting}>
-                                            {isSubmitting ? 'REGISTRANDO...' : 'ENVIAR COMPROVANTE'} <i className="material-icons align-middle ms-2">send</i>
-                                        </button>
-                                    </div>
+                        {/* STEP 3: CHECKOUT */}
+                        {step === 3 && (
+                            <div className="l-card col-md-8 mx-auto text-center py-5">
+                                <h3 className="text-white mb-2 brand-font"><span className="text-gold">03.</span> CONFIRMAÇÃO</h3>
+                                <p className="text-muted">Utilize a chave PIX abaixo.</p>
+                                
+                                <div className="bg-dark p-4 rounded border border-gold d-inline-block mb-4 cursor-pointer position-relative overflow-hidden" 
+                                     onClick={() => {navigator.clipboard.writeText("7bb7efc3-1a3c-4bc5-9e58-ab1b78e8909c"); Swal.fire({toast:true, position:'top', icon:'success', title:'Copiado!', background:'#222', color:'#fff', showConfirmButton:false, timer:1500})}}>
+                                    <h2 className="text-gold mb-3">R$ {cartTotal.toFixed(2)}</h2>
+                                    <code className="text-white d-block mb-2 text-break px-3">7bb7efc3-1a3c-4bc5-9e58-ab1b78e8909c</code>
+                                    <small className="text-orange text-uppercase fw-bold">[CLIQUE PARA COPIAR]</small>
                                 </div>
-                            )}
-                        </div>
+
+                                <div className="alert alert-dark text-start mx-auto border border-secondary" style={{maxWidth:'500px'}}>
+                                    <h6 className="text-white fw-bold mb-2"><i className="material-icons align-middle text-gold">info</i> Instruções Finais:</h6>
+                                    <small className="text-muted d-block mb-1">1. Realize o pagamento exato via PIX.</small>
+                                    <small className="text-muted d-block mb-1">2. Clique no botão abaixo para abrir seu e-mail.</small>
+                                    <small className="text-muted d-block">3. Anexe o comprovante e envie.</small>
+                                </div>
+
+                                <div className="mt-4">
+                                    <button className="btn btn-outline-secondary me-2" onClick={() => setStep(2)}>CORRIGIR PEDIDO</button>
+                                    <button className="btn-action" style={{width:'auto'}} onClick={enviarDados} disabled={isSubmitting}>
+                                        {isSubmitting ? 'REGISTRANDO...' : 'JÁ PAGUEI, ENVIAR E-MAIL'} <i className="material-icons align-middle ms-2">send</i>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             );
@@ -391,16 +553,16 @@
                 </div>
                 <div className="l-card text-center py-5">
                     <i className="material-icons text-muted" style={{fontSize:'4rem'}}>table_view</i>
-                    <h4 className="text-white mt-3">Visualizar Dados</h4>
+                    <h4 className="text-white mt-3">Base de Dados</h4>
                     <p className="text-muted">Acesse a Planilha Google para ver os inscritos em tempo real.</p>
-                    <a href="#" target="_blank" className="btn btn-outline-gold mt-2">ABRIR PLANILHA MESTRA</a>
+                    <a href="https://docs.google.com/spreadsheets" target="_blank" className="btn btn-outline-gold mt-2">ABRIR PLANILHA MESTRA</a>
                 </div>
             </div>
         );
 
-        // APP PRINCIPAL
+        // APP
         const App = () => {
-            const [view, setView] = useState('home'); // home, wizard, admin
+            const [view, setView] = useState('home');
 
             const handleAdminLogin = () => {
                 Swal.fire({
@@ -432,39 +594,3 @@
     </script>
 </body>
 </html>
-```
-
-### **Passo 2: Configurar o Google Apps Script (Backend)**
-
-Para que o formulário funcione e envie dados para sua planilha, siga este passo a passo rápido:
-
-1.  Crie uma nova Planilha Google: `Legendarios_Dados`.
-2.  Vá em **Extensões > Apps Script**.
-3.  Apague todo o código que estiver lá e cole este:
-
-```javascript
-function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  
-  // Se for o primeiro acesso, cria o cabeçalho
-  if (sheet.getLastRow() === 0) {
-    sheet.appendRow(["Data", "Numero", "Nome", "CEP", "Curso", "Total", "Pedido JSON"]);
-  }
-
-  // Pega os dados enviados pelo site
-  var data = JSON.parse(e.postData.contents);
-  
-  // Salva na linha
-  sheet.appendRow([
-    new Date(),
-    data.numero,
-    data.nome,
-    data.cep,
-    data.curso,
-    data.total,
-    JSON.stringify(data.carrinho) // Salva o carrinho como texto
-  ]);
-
-  return ContentService.createTextOutput(JSON.stringify({"status": "sucesso"}))
-    .setMimeType(ContentService.MimeType.JSON);
-}
