@@ -381,6 +381,7 @@
                                             <button type="button" className="btn-measure" onClick={() => showMeasurementModal('top')}>Medidas 2ª Pele</button>
                                         </div>
                                         <select className="form-select form-select-sm" value={sizeTop} onChange={e => setSizeTop(e.target.value)}>
+                                            <option value="">Selecione</option>
                                             {SIZES_TOP.map(s => <option key={s} value={s}>{s}</option>)}
                                         </select>
                                     </div>
@@ -392,13 +393,22 @@
                                             <button type="button" className="btn-measure" onClick={() => showMeasurementModal('bottom')}>Medidas Calça</button>
                                         </div>
                                         <select className="form-select form-select-sm" value={sizeBottom} onChange={e => setSizeBottom(e.target.value)}>
+                                            <option value="">Selecione</option>
                                             {SIZES_BOTTOM.map(s => <option key={s} value={s}>{s}</option>)}
                                         </select>
                                     </div>
                                 )}
-                                <button id={`btn-${product.id}`} className="btn-add w-100 mt-2" onClick={handleAdd}>
-                                    ADICIONAR <i className="material-icons align-middle" style={{fontSize:'16px'}}>add_shopping_cart</i>
-                                </button>
+<button
+    id={`btn-${product.id}`}
+    className="btn-add w-100 mt-2"
+    onClick={handleAdd}
+    disabled={
+        (product.hasTopSize && !sizeTop) ||
+        (product.hasBottomSize && !sizeBottom)
+    }
+>
+    ADICIONAR <i className="material-icons align-middle" style={{fontSize:'16px'}}>ao_carrinho</i>
+</button>
                             </div>
                         </div>
                     </div>
