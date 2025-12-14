@@ -155,6 +155,14 @@
         .form-control:focus, .form-select:focus {
             background-color: #222; border-color: var(--gold); color: white; box-shadow: none;
         }
+        
+        /* Ajuste específico para input disabled (Endereço) */
+        .form-control:disabled {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            opacity: 1;
+            font-weight: 600;
+        }
 
         .fade-in { animation: fadeIn 0.5s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -182,7 +190,7 @@
                 name: 'KIT TÁTICO COMPLETO', 
                 price: 179.90, 
                 desc: '2ª Pele + Calça + Balaclava + Patch', 
-                image: 'https://eventos-mizraim.github.io/gestao/2pele.jpeg', // Usando 2pele como representativa ou substitua
+                image: 'https://eventos-mizraim.github.io/gestao/2pele.jpeg', 
                 hasTopSize: true, 
                 hasBottomSize: true 
             },
@@ -217,6 +225,7 @@
 
         const SIZES_TOP = ['P', 'M', 'G', 'GG', 'G1', 'G2'];
         const SIZES_BOTTOM = ['38', '40', '42', '44', '46', '48'];
+        const AREAS = ['Administração', 'Comunicação', 'Eventos', 'Hakunas (Saúde)', 'Intercessão', 'Logística', 'Mídia'];
 
         // --- COMPONENTES ---
 
@@ -336,8 +345,17 @@
         // VIEW: WIZARD
         const Wizard = ({ setView }) => {
             const [step, setStep] = useState(1);
-            const [formData, setFormData] = useState({ numero: '', nome: '', cep: '', endereco: '', curso: 'nao', certificado: '' });
-            const [cartItems, setCartItems] = useState([]); // Array de itens
+            const [formData, setFormData] = useState({ 
+                numero: '', 
+                nome: '', 
+                cep: '', 
+                endereco: '', 
+                serviu: 'nao',
+                area: '',
+                curso: 'nao', 
+                certificado: null 
+            });
+            const [cartItems, setCartItems] = useState([]); 
             const [isSubmitting, setIsSubmitting] = useState(false);
 
             // FUNÇÕES STEP 1
@@ -353,6 +371,16 @@
                 }
             };
 
+            // Lê o arquivo para Base64 (simplificado para o formulário)
+            const handleFile = (e) => {
+                const file = e.target.files[0];
+                if(file) {
+                     // Em um cenário real, você leria o arquivo aqui.
+                     // Para este protótipo, salvamos o nome.
+                     setFormData({...formData, certificado: file.name});
+                }
+            };
+
             // FUNÇÕES STEP 2 (CARRINHO ARRAY)
             const addToCart = (item) => {
                 setCartItems([...cartItems, item]);
@@ -365,9 +393,7 @@
             const cartTotal = cartItems.reduce((acc, item) => acc + item.price, 0);
 
             const validateShop = () => {
-                // Verifica se tem Balaclava (seja item avulso ou dentro do Kit)
                 const hasBalaclava = cartItems.some(i => i.id === 'balaclava' || i.id === 'kit');
-                
                 if (!hasBalaclava) {
                     Swal.fire({
                         icon: 'warning',
@@ -431,16 +457,58 @@
                                         </div>
                                         <div className="col-md-8">
                                             <label>Endereço</label>
-                                            <input type="text" className="form-control" disabled value={formData.endereco} />
+                                            {/* Classe ajustada no CSS para fundo branco e letra preta */}
+                                            <input type="text" className="form-control" disabled value={formData.endereco} placeholder="Preenchimento Automático" />
                                         </div>
+
                                         <div className="col-md-12">
-                                            <label>Já fez o Curso N1?</label>
-                                            <select className="form-select" value={formData.curso} onChange={e => setFormData({...formData, curso: e.target.value})}>
-                                                <option value="nao">Não (Curso Obrigatório)</option>
-                                                <option value="sim">Sim (Tenho certificado)</option>
+                                            <hr className="border-secondary my-3"/>
+                                            <label className="fw-bold text-gold">Você já serviu em outros Top ANTES?</label>
+                                            <select className="form-select mt-1" value={formData.serviu} onChange={e => setFormData({...formData, serviu: e.target.value})}>
+                                                <option value="nao">Não, é a 1ª Vez</option>
+                                                <option value="sim">Sim</option>
                                             </select>
                                         </div>
+
+                                        {formData.serviu === 'sim' && (
+                                            <div className="col-md-12 fade-in">
+                                                <label>Informe a área:</label>
+                                                <select className="form-select" required value={formData.area} onChange={e => setFormData({...formData, area: e.target.value})}>
+                                                    <option value="">Selecione...</option>
+                                                    {AREAS.map(a => <option key={a} value={a}>{a}</option>)}
+                                                </select>
+                                            </div>
+                                        )}
+
+                                        <div className="col-md-12 mt-3">
+                                            <label className="fw-bold">Já fez o Curso N1?</label>
+                                            <select className="form-select mt-1" value={formData.curso} onChange={e => setFormData({...formData, curso: e.target.value})}>
+                                                <option value="nao">Não</option>
+                                                <option value="sim">Sim</option>
+                                            </select>
+                                        </div>
+
+                                        {formData.curso === 'sim' ? (
+                                            <div className="col-md-12 fade-in">
+                                                <label className="text-gold">Comprovante de conclusão (Anexo)</label>
+                                                <input type="file" className="form-control" required accept="image/*,application/pdf" onChange={handleFile} />
+                                                <small className="text-muted">Anexe foto ou PDF do certificado.</small>
+                                            </div>
+                                        ) : (
+                                            <div className="col-md-12 fade-in mt-2">
+                                                <div className="alert alert-danger border-danger">
+                                                    <h6 className="fw-bold"><i className="material-icons align-middle me-1">warning</i> ATENÇÃO!</h6>
+                                                    <p className="mb-2 small">Esse link abaixo é pra fazer o curso! Esse curso é <strong>obrigatório</strong>!</p>
+                                                    <p className="mb-3 small">Não esqueça de Colocar que você faz parte da <strong>DISRUPÇÃO</strong>.</p>
+                                                    <a href="https://legendariostrainingcenter.com/" target="_blank" className="btn btn-sm btn-light fw-bold text-danger w-100">
+                                                        ACESSAR CURSO AGORA
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
+
+                                    {/* Só habilita o botão avançar se o curso for SIM ou se for só navegação, mas deixei livre para navegar */}
                                     <div className="text-end mt-4">
                                         <button type="submit" className="btn-action">AVANÇAR <i className="material-icons align-middle">arrow_forward</i></button>
                                     </div>
