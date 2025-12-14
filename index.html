@@ -3,28 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Legendários - Gestão de Eventos</title>
+    <title>Legendários - Mizraim | Gestão de Eventos</title>
 
     <!-- Bibliotecas Externas -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Black+Ops+One&family=Cinzel:wght@700&display=swap" rel="stylesheet">
 
-    <!-- React -->
+    <!-- React & SweetAlert -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-    <!-- SweetAlert2 para alertas bonitos -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         :root {
-            --bg-dark: #0a0a0a;
-            --bg-card: #141414;
-            --accent-gold: #D4AF37;
-            --accent-orange: #FF6600;
+            --bg-dark: #050505;
+            --bg-panel: #111111;
+            --gold: #D4AF37;
+            --gold-dim: #8a701e;
+            --orange: #FF4500;
             --text-main: #e0e0e0;
         }
 
@@ -32,72 +31,169 @@
             background-color: var(--bg-dark);
             color: var(--text-main);
             font-family: 'Inter', sans-serif;
+            background-image: radial-gradient(circle at 50% 0%, #1a1a00 0%, #050505 60%);
+            min-height: 100vh;
             overflow-x: hidden;
         }
 
         h1, h2, h3, .brand-font {
-            font-family: 'Cinzel', serif;
+            font-family: 'Black Ops One', cursive;
             letter-spacing: 2px;
+            text-transform: uppercase;
         }
+
+        .cinzel { font-family: 'Cinzel', serif; }
 
         /* Utilitários */
-        .text-gold { color: var(--accent-gold) !important; }
-        .text-orange { color: var(--accent-orange) !important; }
-        .bg-gold { background-color: var(--accent-gold); color: #000; }
-        .btn-orange { 
-            background: linear-gradient(45deg, #FF6600, #ff8c00); 
-            color: white; border: none; font-weight: bold; 
-            text-transform: uppercase; letter-spacing: 1px;
+        .text-gold { color: var(--gold) !important; }
+        .text-orange { color: var(--orange) !important; }
+        .bg-gold { background-color: var(--gold); color: #000; }
+        
+        /* Botões */
+        .btn-action {
+            background: linear-gradient(135deg, var(--orange) 0%, #cc3700 100%);
+            border: none;
+            color: white;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 12px 30px;
+            clip-path: polygon(10% 0, 100% 0, 100% 80%, 90% 100%, 0 100%, 0 20%);
+            transition: all 0.3s;
+            width: 100%;
         }
-        .btn-orange:hover { background: #e65c00; color: white; box-shadow: 0 0 15px rgba(255, 102, 0, 0.4); }
+        .btn-action:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(255, 69, 0, 0.4);
+            color: white;
+        }
+        
+        .btn-add {
+            background-color: var(--gold);
+            color: black;
+            font-weight: bold;
+            border: none;
+            padding: 8px 16px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+        .btn-add:hover { background-color: #fff; }
 
-        /* Card Estilizado */
+        .btn-measure {
+            background: none;
+            border: none;
+            color: var(--gold);
+            font-size: 0.75rem;
+            text-decoration: underline;
+            padding: 0;
+            margin-left: 8px;
+            cursor: pointer;
+        }
+        .btn-measure:hover { color: #fff; }
+
+        /* Cards e Painéis */
         .l-card {
-            background-color: var(--bg-card);
+            background-color: var(--bg-panel);
             border: 1px solid #333;
-            border-left: 4px solid var(--accent-gold);
-            border-radius: 8px;
+            border-left: 4px solid var(--gold);
+            border-radius: 4px;
             padding: 20px;
             margin-bottom: 20px;
             transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        .l-card:hover { transform: translateY(-2px); border-color: var(--accent-orange); }
+        
+        .product-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .product-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-bottom: 1px solid #333;
+        }
+        .product-body { padding: 15px; flex-grow: 1; display: flex; flex-direction: column; }
+        
+        /* Navbar */
+        .l-navbar {
+            background-color: rgba(0,0,0,0.95);
+            border-bottom: 2px solid var(--gold);
+            padding: 15px 0;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        /* Wizard Steps */
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 15px; left: 0; right: 0;
+            height: 2px; background: #333; z-index: 0;
+        }
+        .step {
+            width: 35px; height: 35px;
+            background: #222; border: 2px solid #444; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1; font-weight: bold; color: #666;
+            transition: all 0.3s;
+        }
+        .step.active { background: var(--gold); border-color: var(--gold); color: black; box-shadow: 0 0 15px var(--gold-dim); }
+        .step.completed { background: var(--orange); border-color: var(--orange); color: white; }
+
+        /* Cart Table */
+        .cart-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .cart-table th { text-align: left; color: #888; font-size: 0.8rem; border-bottom: 1px solid #333; padding: 5px; }
+        .cart-table td { padding: 10px 5px; border-bottom: 1px solid #222; color: #ddd; font-size: 0.9rem; }
+        .btn-trash { background: none; border: none; color: #d63333; cursor: pointer; }
+        .btn-trash:hover { color: #ff0000; }
 
         /* Inputs */
         .form-control, .form-select {
-            background-color: #222;
-            border: 1px solid #444;
-            color: white;
+            background-color: #0f0f0f; border: 1px solid #333; color: white;
+            border-radius: 2px; padding: 8px;
         }
         .form-control:focus, .form-select:focus {
-            background-color: #222;
-            color: white;
-            border-color: var(--accent-gold);
-            box-shadow: 0 0 5px rgba(212, 175, 55, 0.3);
+            background-color: #222; border-color: var(--gold); color: white; box-shadow: none;
+        }
+        
+        /* Ajuste específico para input disabled (Endereço) */
+        .form-control:disabled {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            opacity: 1;
+            font-weight: 600;
         }
 
-        /* Navbar */
-        .l-navbar {
-            background-color: rgba(0,0,0,0.9);
-            border-bottom: 2px solid var(--accent-gold);
-            padding: 15px 0;
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .measure-balloon {
+            background: var(--gold);
+            color: black;
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
         }
-
-        /* Imagens da Loja */
-        .product-img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid #444;
-            margin-bottom: 10px;
-        }
-
-        /* Modal Customizado */
-        .modal-content {
-            background-color: #1a1a1a;
-            border: 1px solid var(--accent-gold);
-        }
+        .measure-balloon:hover { background: #fff; transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -106,66 +202,209 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // --- DADOS MOCKADOS ---
-        const AVISOS_INICIAIS = [
-            { id: 1, title: 'BEM-VINDOS GUERREIROS', date: 'HOJE', desc: 'Gratidão aos 26 homens que aceitaram o chamado. A jornada apenas começou.', important: true },
-            { id: 2, title: 'Reunião de Alinhamento', date: 'Sexta, 20h', desc: 'Todos os coordenadores devem estar presentes.', important: false },
-            { id: 3, title: 'Prazo Uniformes', date: 'Até Domingo', desc: 'O pedido do kit deve ser feito via sistema.', important: true }
+        // --- CONFIGURAÇÃO GOOGLE APPS SCRIPT ---
+        const SCRIPT_URL = "INSIRA_SEU_LINK_DO_WEB_APP_AQUI"; 
+
+        // --- DADOS ---
+        const AVISOS = [
+            { id: 1, title: 'MISSÃO CUMPRIDA', date: 'HOJE', desc: 'Gratidão aos 27 homens que aceitaram o chamado.', important: true },
+            { id: 2, title: 'PRAZO UNIFORMES', date: 'DOMINGO | 21.12', desc: 'Pedido obrigatório via sistema.', important: true },
+            { id: 3, title: 'Reunião Geral', date: 'EM BREVE JAN|2026', desc: 'Convocação será no Whatsapp.', important: false }
         ];
 
-        const SETORES = [
-            { nome: 'Eventos', icon: 'groups', desc: 'Coordena as tribos, organiza os grupos e acompanha as famílias.' },
-            { nome: 'Segurança', icon: 'security', desc: 'Integridade física, monitoramento de trilhas e prevenção de riscos.' },
-            { nome: 'Logística', icon: 'local_shipping', desc: 'Base de operações: cozinha, insumos, transporte e estrutura.' },
-            { nome: 'Mídia', icon: 'photo_camera', desc: 'Captação de imagens, vídeo e divulgação oficial.' },
-            { nome: 'Comunicação', icon: 'cell_tower', desc: 'Rádios, antenas e fluxo de informações entre equipes.' },
-            { nome: 'Hakuna (Saúde)', icon: 'medical_services', desc: 'Médicos e primeiros socorros.' },
-            { nome: 'ADM', icon: 'assignment', desc: 'Inscrições, cronogramas e documentação.' },
-            { nome: 'Intercessão', icon: 'volunteer_activism', desc: 'Cobertura espiritual e oração.' }
+        const PRODUCTS = [
+            { 
+                id: 'kit', 
+                name: 'KIT TÁTICO COMPLETO', 
+                price: 179.90, 
+                desc: '2ª Pele + Calça + Balaclava + Patch', 
+                image: 'https://eventos-mizraim.github.io/gestao/2pele.jpeg', 
+                hasTopSize: true, 
+                hasBottomSize: true 
+            },
+            { 
+                id: 'balaclava', 
+                name: 'Balaclava Tática', 
+                price: 30.00, 
+                desc: 'Proteção Essencial (Obrigatório)', 
+                image: 'https://eventos-mizraim.github.io/gestao/balaclava.jpeg',
+                hasTopSize: false, 
+                hasBottomSize: false 
+            },
+            { 
+                id: 'pele', 
+                name: '2ª Pele Térmica', 
+                price: 70.00, 
+                desc: 'Manga Longa UV50+', 
+                image: 'https://eventos-mizraim.github.io/gestao/2pele.jpeg',
+                hasTopSize: true, 
+                hasBottomSize: false 
+            },
+            { 
+                id: 'calca', 
+                name: 'Calça Ripstop', 
+                price: 90.00, 
+                desc: 'Reforço no joelho', 
+                image: 'https://eventos-mizraim.github.io/gestao/calca.jpeg',
+                hasTopSize: false, 
+                hasBottomSize: true 
+            },
         ];
+
+        const SIZES_TOP = ['P', 'M', 'G', 'GG', 'XG'];
+        const SIZES_BOTTOM = ['cP', 'cM', 'cG', 'cGG', 'cXG'];
+        const AREAS = ['Administração', 'Comunicação', 'Eventos', 'Hakunas (Saúde)', 'Intercessão', 'Logística', 'Mídia'];
+
+        // --- UTILS: MODAIS DE MEDIDAS ---
+        const showMeasurementModal = (type) => {
+            if (type === 'top') {
+                Swal.fire({
+                    imageUrl: 'https://eventos-mizraim.github.io/assets/MEDIDAS2%C2%AAPELE.jpeg',
+                    imageAlt: 'Tabela de Medidas 2ª Pele',
+                    showCloseButton: true,
+                    confirmButtonColor: '#D4AF37',
+                    background: '#1a1a1a',
+                    color: '#fff'
+                });
+            } else if (type === 'bottom') {
+                Swal.fire({
+                    imageUrl: 'https://eventos-mizraim.github.io/assets/MEDIDASCALCA.jpeg',
+                    imageAlt: 'Tabela de Medidas Calça',
+                    showCloseButton: true,
+                    confirmButtonColor: '#D4AF37',
+                    background: '#1a1a1a',
+                    color: '#fff'
+                });
+            } else if (type === 'video') {
+                Swal.fire({
+                    title: 'Como Medir Passo a Passo',
+                    html: `
+                        <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; background: #000;">
+                            <video controls style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                                <source src="https://eventos-mizraim.github.io/assets/COMOMEDIRPASSOAPASSO.mp4" type="video/mp4">
+                                Seu navegador não suporta vídeos.
+                            </video>
+                        </div>
+                    `,
+                    showCloseButton: true,
+                    confirmButtonColor: '#D4AF37',
+                    width: '600px',
+                    background: '#1a1a1a',
+                    color: '#fff'
+                });
+            }
+        }
 
         // --- COMPONENTES ---
 
-        // 1. HEADER
-        const Header = ({ setView }) => (
+        const Header = ({ setView, onAdminClick }) => (
             <nav className="l-navbar sticky-top">
                 <div className="container d-flex justify-content-between align-items-center">
-                    <div className="d-flex align-items-center gap-3" onClick={() => setView('home')} style={{cursor: 'pointer'}}>
-                        <img src="https://eventos-mizraim.github.io/gestao/Eventos.png" height="50" alt="Logo Depto" />
+                    <div className="d-flex align-items-center gap-3" onClick={() => setView('home')} style={{cursor:'pointer'}}>
+                        <img src="https://eventos-mizraim.github.io/gestao/Eventos.png" height="50" alt="Logo" />
                         <div className="d-none d-md-block">
                             <h4 className="m-0 brand-font text-gold">LEGENDÁRIOS</h4>
-                            <small className="text-white opacity-50">MIZRAIM - LIMITE DUPLO</small>
+                            <small className="text-white opacity-50 cinzel">MIZRAIM - LIMITE DUPLO</small>
                         </div>
                     </div>
                     <div className="d-flex gap-2">
-                        <button className="btn btn-sm btn-outline-light" onClick={() => setView('cadastro')}>FICHA</button>
-                        <button className="btn btn-sm btn-outline-warning" onClick={() => setView('loja')}>LOJA</button>
-                        <button className="btn btn-sm btn-dark text-gold border-gold" onClick={() => setView('admin_login')}>COORD</button>
+                        <button className="btn btn-sm btn-outline-warning" onClick={() => setView('wizard')}>
+                            <i className="material-icons align-middle me-1">assignment</i> INSCRIÇÃO
+                        </button>
+                        <button className="btn btn-sm btn-dark text-gold border-gold" onClick={onAdminClick}>
+                            <i className="material-icons">lock</i>
+                        </button>
                     </div>
                 </div>
             </nav>
         );
 
-        // 2. DASHBOARD / HOME
-        const Home = () => (
-            <div className="container py-5">
-                <div className="text-center mb-5 animate__animated animate__fadeIn">
+        // --- SUB-COMPONENTE: CARD DE PRODUTO ---
+        const ProductCard = ({ product, onAdd }) => {
+            const [sizeTop, setSizeTop] = useState('G');
+            const [sizeBottom, setSizeBottom] = useState('42');
+
+            const handleAdd = () => {
+                onAdd({
+                    ...product,
+                    selectedTop: product.hasTopSize ? sizeTop : null,
+                    selectedBottom: product.hasBottomSize ? sizeBottom : null,
+                    uniqueId: Date.now() + Math.random() // ID único para o carrinho
+                });
+                
+                const btn = document.getElementById(`btn-${product.id}`);
+                const originalText = btn.innerText;
+                btn.innerText = "ADICIONADO!";
+                btn.classList.add('bg-success', 'text-white');
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.remove('bg-success', 'text-white');
+                }, 1000);
+            };
+
+            return (
+                <div className="col-md-6 col-lg-3 mb-4">
+                    <div className="product-card">
+                        <img src={product.image} className="product-img" alt={product.name} />
+                        <div className="product-body">
+                            <h6 className="text-white fw-bold mb-1">{product.name}</h6>
+                            <p className="text-muted small mb-2" style={{lineHeight:'1.2'}}>{product.desc}</p>
+                            <div className="text-gold fw-bold mb-3">R$ {product.price.toFixed(2)}</div>
+                            
+                            <div className="mt-auto">
+                                {product.hasTopSize && (
+                                    <div className="mb-2">
+                                        <div className="d-flex justify-content-between align-items-center mb-1">
+                                            <label className="text-white fw-bold small">Tamanho (Superior)</label>
+                                            <button type="button" className="btn-measure" onClick={() => showMeasurementModal('top')}>Medidas 2ª Pele</button>
+                                        </div>
+                                        <select className="form-select form-select-sm" value={sizeTop} onChange={e => setSizeTop(e.target.value)}>
+                                            {SIZES_TOP.map(s => <option key={s} value={s}>{s}</option>)}
+                                        </select>
+                                    </div>
+                                )}
+                                {product.hasBottomSize && (
+                                    <div className="mb-2">
+                                        <div className="d-flex justify-content-between align-items-center mb-1">
+                                            <label className="text-white fw-bold small">Tamanho (Calça)</label>
+                                            <button type="button" className="btn-measure" onClick={() => showMeasurementModal('bottom')}>Medidas Calça</button>
+                                        </div>
+                                        <select className="form-select form-select-sm" value={sizeBottom} onChange={e => setSizeBottom(e.target.value)}>
+                                            {SIZES_BOTTOM.map(s => <option key={s} value={s}>{s}</option>)}
+                                        </select>
+                                    </div>
+                                )}
+                                <button id={`btn-${product.id}`} className="btn-add w-100 mt-2" onClick={handleAdd}>
+                                    ADICIONAR <i className="material-icons align-middle" style={{fontSize:'16px'}}>add_shopping_cart</i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // VIEW: HOME
+        const Home = ({ setView }) => (
+            <div className="container py-5 fade-in">
+                <div className="text-center mb-5">
                     <img src="https://eventos-mizraim.github.io/gestao/MIZRAIM_LIMITE%20DUPLO.png" className="img-fluid mb-3" style={{maxHeight: '150px'}} />
-                    <h1 className="text-gold display-4 fw-bold">MISSÃO CUMPRIDA</h1>
-                    <p className="lead text-white">26 Homens. Uma nova história.</p>
-                    <div className="alert alert-dark border-gold d-inline-block mt-3">
-                        <i className="material-icons align-middle text-gold me-2">star</i>
-                        "O ferro afia o ferro, e um homem afia o outro."
+                    <h1 className="text-gold display-4 fw-bold brand-font">BEM-VINDOS</h1>
+                    <p className="lead text-white cinzel">"O ferro afia o ferro, e um homem afia o outro."</p>
+                    <div className="d-flex justify-content-center gap-3 mt-4">
+                        <button className="btn-action" style={{maxWidth:'300px'}} onClick={() => setView('wizard')}>
+                            INICIAR JORNADA <i className="material-icons align-middle ms-2">arrow_forward</i>
+                        </button>
                     </div>
                 </div>
 
                 <div className="row g-4">
                     <div className="col-md-8 offset-md-2">
                         <h4 className="text-orange mb-3 brand-font"><i className="material-icons align-middle">campaign</i> COMUNICADOS DO PÚLPITO</h4>
-                        {AVISOS_INICIAIS.map(aviso => (
+                        {AVISOS.map(aviso => (
                             <div key={aviso.id} className="l-card">
                                 <div className="d-flex justify-content-between align-items-start">
-                                    <h5 className={aviso.important ? "text-gold fw-bold" : "text-white"}>{aviso.title}</h5>
+                                    <h5 className={aviso.important ? "text-gold fw-bold brand-font" : "text-white fw-bold"}>{aviso.title}</h5>
                                     <span className="badge bg-secondary">{aviso.date}</span>
                                 </div>
                                 <p className="text-muted m-0 mt-2">{aviso.desc}</p>
@@ -176,300 +415,319 @@
             </div>
         );
 
-        // 3. FICHA DE CADASTRO
-        const FichaCadastro = () => {
-            const [cep, setCep] = useState('');
-            const [endereco, setEndereco] = useState('Aguardando CEP...');
-            const [jaServiu, setJaServiu] = useState('nao');
-            const [fezCurso, setFezCurso] = useState('nao');
+        // VIEW: WIZARD
+        const Wizard = ({ setView }) => {
+            const [step, setStep] = useState(1);
+            const [formData, setFormData] = useState({ 
+                numero: '', 
+                nome: '', 
+                cep: '', 
+                endereco: '', 
+                serviu: 'nao',
+                area: '',
+                curso: 'nao', 
+                certificado: null 
+            });
+            const [cartItems, setCartItems] = useState([]); 
+            const [isSubmitting, setIsSubmitting] = useState(false);
 
-            const buscarCep = async (e) => {
-                const valor = e.target.value;
-                setCep(valor);
-                if (valor.length === 8) {
+            // FUNÇÕES STEP 1
+            const handleCep = async (e) => {
+                const cep = e.target.value.replace(/\D/g, '');
+                setFormData({...formData, cep});
+                if (cep.length === 8) {
                     try {
-                        setEndereco("Buscando...");
-                        const response = await fetch(`https://viacep.com.br/ws/${valor}/json/`);
-                        const data = await response.json();
-                        if (!data.erro) {
-                            setEndereco(`${data.logradouro}, ${data.bairro}, ${data.localidade}-${data.uf}`);
-                        } else {
-                            setEndereco("CEP não encontrado.");
-                        }
-                    } catch (error) {
-                        setEndereco("Erro na busca.");
-                    }
+                        const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                        const json = await res.json();
+                        if (!json.erro) setFormData(prev => ({...prev, cep, endereco: `${json.logradouro}, ${json.bairro} - ${json.localidade}/${json.uf}`}));
+                    } catch (err) {}
                 }
             };
 
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                // Aqui entraria a lógica de envio para API Google Sheets
-                Swal.fire({
-                    title: 'Dados Recebidos!',
-                    text: 'Seu cadastro foi enviado para a secretaria.',
-                    icon: 'success',
-                    background: '#121212',
-                    color: '#fff',
-                    confirmButtonColor: '#D4AF37'
-                });
+            const handleFile = (e) => {
+                const file = e.target.files[0];
+                if(file) {
+                     setFormData({...formData, certificado: file.name});
+                }
+            };
+
+            // FUNÇÕES STEP 2 (CARRINHO ARRAY)
+            const addToCart = (item) => {
+                setCartItems([...cartItems, item]);
+            };
+
+            const removeFromCart = (uniqueId) => {
+                setCartItems(cartItems.filter(item => item.uniqueId !== uniqueId));
+            };
+
+            const cartTotal = cartItems.reduce((acc, item) => acc + item.price, 0);
+
+            const validateShop = () => {
+                const hasBalaclava = cartItems.some(i => i.id === 'balaclava' || i.id === 'kit');
+                if (!hasBalaclava) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'ITEM OBRIGATÓRIO',
+                        text: 'Você precisa adicionar pelo menos 1 Balaclava (Avulsa ou no Kit).',
+                        confirmButtonColor: '#D4AF37', background: '#111', color: '#fff'
+                    });
+                    return false;
+                }
+                return true;
+            };
+
+            // FUNÇÕES STEP 3
+            const enviarDados = async () => {
+                setIsSubmitting(true);
+                const payload = { 
+                    ...formData, 
+                    carrinho: cartItems.map(i => `${i.name} (${i.selectedTop || ''} ${i.selectedBottom || ''})`).join(', '), 
+                    total: cartTotal.toFixed(2), 
+                    data_hora: new Date().toISOString() 
+                };
+                
+                try {
+                    // await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                    setTimeout(() => {
+                        setIsSubmitting(false);
+                        const assunto = `PAGAMENTO - ${formData.nome} | ${formData.numero}`;
+                        window.location.href = `mailto:eventosmizraim.lgndzs@gmail.com?subject=${encodeURIComponent(assunto)}&body=Segue comprovante anexo.%0D%0A%0D%0APedido:%0D%0A${payload.carrinho}%0D%0A%0D%0ATotal: R$ ${payload.total}`;
+                    }, 1500);
+                } catch (e) {
+                    setIsSubmitting(false);
+                    Swal.fire('Erro', 'Tente novamente', 'error');
+                }
             };
 
             return (
-                <div className="container py-4">
-                    <h2 className="text-gold text-center mb-4">FICHA DE COMBATE</h2>
-                    <form onSubmit={handleSubmit} className="col-md-8 mx-auto l-card">
-                        
-                        <div className="mb-3">
-                            <label className="form-label text-orange">Nº Legendário</label>
-                            <input type="number" className="form-control" placeholder="Ex: 104" required />
+                <div className="container py-4 fade-in">
+                    <div className="col-lg-10 mx-auto">
+                        <div className="step-indicator">
+                            <div className={`step ${step >= 1 ? 'active' : ''} ${step > 1 ? 'completed' : ''}`}>1</div>
+                            <div className={`step ${step >= 2 ? 'active' : ''} ${step > 2 ? 'completed' : ''}`}>2</div>
+                            <div className={`step ${step >= 3 ? 'active' : ''} ${step > 3 ? 'completed' : ''}`}>3</div>
                         </div>
 
-                        <div className="mb-3">
-                            <label className="form-label">Nome Completo</label>
-                            <input type="text" className="form-control" required />
-                        </div>
+                        {/* STEP 1: DADOS */}
+                        {step === 1 && (
+                            <div className="l-card col-md-8 mx-auto">
+                                <form onSubmit={(e) => { e.preventDefault(); setStep(2); }}>
+                                    <h3 className="text-white mb-4 brand-font"><span className="text-gold">01.</span> DADOS DO COMBATENTE</h3>
+                                    <div className="row g-3">
+                                        <div className="col-md-3">
+                                            <label className="text-orange fw-bold">Nº Legendário</label>
+                                            <input type="number" className="form-control" required value={formData.numero} onChange={e => setFormData({...formData, numero: e.target.value})} />
+                                        </div>
+                                        <div className="col-md-9">
+                                            <label>Nome Completo</label>
+                                            <input type="text" className="form-control text-uppercase" required value={formData.nome} onChange={e => setFormData({...formData, nome: e.target.value})} />
+                                        </div>
+                                        <div className="col-md-4">
+                                            <label>CEP</label>
+                                            <input type="text" className="form-control" maxLength="8" required value={formData.cep} onChange={handleCep} />
+                                        </div>
+                                        <div className="col-md-8">
+                                            <label>Endereço</label>
+                                            {/* Classe ajustada no CSS para fundo branco e letra preta */}
+                                            <input type="text" className="form-control" disabled value={formData.endereco} placeholder="Preenchimento Automático" />
+                                        </div>
 
-                        <div className="row">
-                            <div className="col-md-4 mb-3">
-                                <label className="form-label">CEP (Somente Números)</label>
-                                <input type="text" className="form-control" maxLength="8" value={cep} onChange={buscarCep} placeholder="00000000" required />
-                            </div>
-                            <div className="col-md-8 mb-3">
-                                <label className="form-label">Região/Endereço</label>
-                                <input type="text" className="form-control" value={endereco} disabled />
-                            </div>
-                        </div>
+                                        <div className="col-md-12">
+                                            <hr className="border-secondary my-3"/>
+                                            <label className="fw-bold text-gold">Você já serviu em outros Top ANTES?</label>
+                                            <select className="form-select mt-1" value={formData.serviu} onChange={e => setFormData({...formData, serviu: e.target.value})}>
+                                                <option value="nao">Não, é a 1ª Vez</option>
+                                                <option value="sim">Sim</option>
+                                            </select>
+                                        </div>
 
-                        <hr className="border-secondary" />
+                                        {formData.serviu === 'sim' && (
+                                            <div className="col-md-12 fade-in">
+                                                <label>Informe a área:</label>
+                                                <select className="form-select" required value={formData.area} onChange={e => setFormData({...formData, area: e.target.value})}>
+                                                    <option value="">Selecione...</option>
+                                                    {AREAS.map(a => <option key={a} value={a}>{a}</option>)}
+                                                </select>
+                                            </div>
+                                        )}
 
-                        <div className="mb-3">
-                            <label className="form-label">Já serviu em algum evento?</label>
-                            <select className="form-select" value={jaServiu} onChange={(e) => setJaServiu(e.target.value)}>
-                                <option value="nao">Não, primeira vez</option>
-                                <option value="sim">Sim, já servi</option>
-                            </select>
-                        </div>
+                                        <div className="col-md-12 mt-3">
+                                            <label className="fw-bold">Já fez o Curso N1?</label>
+                                            <select className="form-select mt-1" value={formData.curso} onChange={e => setFormData({...formData, curso: e.target.value})}>
+                                                <option value="nao">Não</option>
+                                                <option value="sim">Sim</option>
+                                            </select>
+                                        </div>
 
-                        {jaServiu === 'sim' && (
-                            <div className="mb-3 animate__animated animate__fadeIn">
-                                <label className="form-label text-gold">Em qual área serviu?</label>
-                                <select className="form-select">
-                                    <option>Eventos</option>
-                                    <option>Cozinha</option>
-                                    <option>Segurança</option>
-                                    <option>Mídia</option>
-                                    <option>Outros</option>
-                                </select>
+                                        {formData.curso === 'sim' ? (
+                                            <div className="col-md-12 fade-in">
+                                                <label className="text-gold">Comprovante de conclusão (Anexo)</label>
+                                                <input type="file" className="form-control" required accept="image/*,application/pdf" onChange={handleFile} />
+                                                <small className="text-muted">Anexe foto ou PDF do certificado.</small>
+                                            </div>
+                                        ) : (
+                                            <div className="col-md-12 fade-in mt-2">
+                                                <div className="alert alert-danger border-danger">
+                                                    <h6 className="fw-bold"><i className="material-icons align-middle me-1">warning</i> ATENÇÃO!</h6>
+                                                    <p className="mb-2 small">Esse link abaixo é pra fazer o curso! Esse curso é <strong>obrigatório</strong>!</p>
+                                                    <p className="mb-3 small">Não esqueça de Colocar que você faz parte da <strong>DISRUPÇÃO</strong>.</p>
+                                                    <a href="https://legendariostrainingcenter.com/" target="_blank" className="btn btn-sm btn-light fw-bold text-danger w-100">
+                                                        ACESSAR CURSO AGORA
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="text-end mt-4">
+                                        <button type="submit" className="btn-action">AVANÇAR <i className="material-icons align-middle">arrow_forward</i></button>
+                                    </div>
+                                </form>
                             </div>
                         )}
 
-                        <div className="mb-3">
-                            <label className="form-label">Já concluiu o Curso N1?</label>
-                            <select className="form-select" value={fezCurso} onChange={(e) => setFezCurso(e.target.value)}>
-                                <option value="nao">Não</option>
-                                <option value="sim">Sim</option>
-                            </select>
-                        </div>
+                        {/* STEP 2: LOJA */}
+                        {step === 2 && (
+                            <div>
+                                <h3 className="text-white mb-4 brand-font text-center"><span className="text-gold">02.</span> ARSENAL & EQUIPAMENTO</h3>
+                                
+                                <div className="text-center mb-4">
+                                    <button className="measure-balloon" onClick={() => showMeasurementModal('video')}>
+                                        <i className="material-icons">help_outline</i> Dúvidas como Medir? Clique aqui
+                                    </button>
+                                </div>
 
-                        {fezCurso === 'sim' ? (
-                            <div className="mb-3">
-                                <label className="form-label text-gold">Anexar Certificado (Link Drive ou Foto)</label>
-                                <input type="file" className="form-control" />
-                                <small className="text-muted">Formatos: JPG, PDF</small>
-                            </div>
-                        ) : (
-                            <div className="alert alert-warning border-gold bg-transparent text-white">
-                                <i className="material-icons align-middle me-2">warning</i>
-                                <strong>Atenção:</strong> O curso é obrigatório. 
-                                <a href="#" className="text-orange fw-bold ms-2">CLIQUE AQUI PARA INICIAR</a>
+                                {/* Lista de Produtos */}
+                                <div className="row">
+                                    {PRODUCTS.map(prod => (
+                                        <ProductCard key={prod.id} product={prod} onAdd={addToCart} />
+                                    ))}
+                                </div>
+
+                                {/* Resumo do Carrinho */}
+                                <div className="l-card mt-3">
+                                    <h5 className="text-white border-bottom border-secondary pb-2 mb-3"><i className="material-icons align-middle text-gold">shopping_cart</i> RESUMO DO PEDIDO</h5>
+                                    
+                                    {cartItems.length === 0 ? (
+                                        <p className="text-muted text-center py-3">Seu carrinho está vazio.</p>
+                                    ) : (
+                                        <div className="table-responsive">
+                                            <table className="cart-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Item</th>
+                                                        <th>Tamanhos</th>
+                                                        <th>Preço</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {cartItems.map((item) => (
+                                                        <tr key={item.uniqueId}>
+                                                            <td>{item.name}</td>
+                                                            <td>
+                                                                {item.selectedTop && <span className="badge bg-dark border border-secondary me-1">{item.selectedTop}</span>}
+                                                                {item.selectedBottom && <span className="badge bg-dark border border-secondary">{item.selectedBottom}</span>}
+                                                            </td>
+                                                            <td className="text-gold">R$ {item.price.toFixed(2)}</td>
+                                                            <td className="text-end">
+                                                                <button className="btn-trash" onClick={() => removeFromCart(item.uniqueId)}>
+                                                                    <i className="material-icons" style={{fontSize:'18px'}}>delete</i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )}
+
+                                    <div className="d-flex justify-content-between align-items-center mt-4 pt-3 border-top border-secondary">
+                                        <h4 className="text-white m-0">Total: <span className="text-gold">R$ {cartTotal.toFixed(2)}</span></h4>
+                                        <div className="d-flex gap-2">
+                                            <button className="btn btn-outline-secondary" onClick={() => setStep(1)}>VOLTAR</button>
+                                            <button className="btn-action" style={{width:'auto'}} onClick={() => { if(validateShop()) setStep(3); }}>
+                                                PAGAMENTO <i className="material-icons align-middle ms-2">payments</i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         )}
 
-                        <button type="submit" className="btn btn-orange w-100 mt-3 py-3">ENVIAR FICHA</button>
-                    </form>
-                </div>
-            );
-        };
-
-        // 4. LOJA / UNIFORMES
-        const Loja = () => {
-            const [balaclava, setBalaclava] = useState(1);
-            const [tamanhoCamisa, setTamanhoCamisa] = useState('G');
-            const [tamanhoCalca, setTamanhoCalca] = useState('42');
-
-            const handleBalaclava = (e) => {
-                const val = parseInt(e.target.value);
-                if (val < 1) {
-                    Swal.fire({ icon: 'error', title: 'Item Obrigatório', text: 'A Balaclava é item de segurança essencial.', background: '#222', color: '#fff' });
-                    setBalaclava(1);
-                } else {
-                    setBalaclava(val);
-                }
-            }
-
-            return (
-                <div className="container py-4">
-                    <h2 className="text-gold text-center mb-4 brand-font">ARSENAL & FARDAMENTO</h2>
-                    
-                    <div className="row">
-                        {/* KIT COMPLETO */}
-                        <div className="col-md-6 mb-4">
-                            <div className="l-card h-100">
-                                <span className="badge bg-gold position-absolute m-2 text-black fw-bold">MAIS VENDIDO</span>
-                                <div className="text-center p-3">
-                                    <img src="https://eventos-mizraim.github.io/gestao/2pele.jpeg" className="product-img" />
-                                </div>
-                                <h4 className="text-white">Kit Tático Completo</h4>
-                                <p className="text-muted">Inclui: 2ª Pele Térmica + Calça Tática + Balaclava + Patch</p>
-                                <hr className="border-secondary"/>
+                        {/* STEP 3: CHECKOUT */}
+                        {step === 3 && (
+                            <div className="l-card col-md-8 mx-auto text-center py-5">
+                                <h3 className="text-white mb-2 brand-font"><span className="text-gold">03.</span> CONFIRMAÇÃO</h3>
+                                <p className="text-muted">Utilize a chave PIX abaixo.</p>
                                 
-                                <label className="form-label text-orange">Tamanho Kit (Pele + Calça)</label>
-                                <div className="d-flex gap-2 mb-3">
-                                    <select className="form-select" value={tamanhoCamisa} onChange={(e) => setTamanhoCamisa(e.target.value)}>
-                                        <option>P</option><option>M</option><option>G</option><option>GG</option><option>G1</option><option>G2</option>
-                                    </select>
-                                    <select className="form-select" value={tamanhoCalca} onChange={(e) => setTamanhoCalca(e.target.value)}>
-                                        <option>38</option><option>40</option><option>42</option><option>44</option><option>46</option><option>48</option>
-                                    </select>
+                                <div className="bg-dark p-4 rounded border border-gold d-inline-block mb-4 cursor-pointer position-relative overflow-hidden" 
+                                     onClick={() => {navigator.clipboard.writeText("7bb7efc3-1a3c-4bc5-9e58-ab1b78e8909c"); Swal.fire({toast:true, position:'top', icon:'success', title:'Copiado!', background:'#222', color:'#fff', showConfirmButton:false, timer:1500})}}>
+                                    <h2 className="text-gold mb-3">R$ {cartTotal.toFixed(2)}</h2>
+                                    <code className="text-white d-block mb-2 text-break px-3">7bb7efc3-1a3c-4bc5-9e58-ab1b78e8909c</code>
+                                    <small className="text-orange text-uppercase fw-bold">[CLIQUE PARA COPIAR]</small>
+                                </div>
+
+                                <div className="alert alert-dark text-start mx-auto border border-secondary" style={{maxWidth:'500px'}}>
+                                    <h6 className="text-white fw-bold mb-2"><i className="material-icons align-middle text-gold">info</i> Instruções Finais:</h6>
+                                    <small className="text-muted d-block mb-1">1. Realize o pagamento exato via PIX.</small>
+                                    <small className="text-muted d-block mb-1">2. Clique no botão abaixo para abrir seu e-mail.</small>
+                                    <small className="text-muted d-block">3. Anexe o comprovante e envie.</small>
+                                </div>
+
+                                <div className="mt-4">
+                                    <button className="btn btn-outline-secondary me-2" onClick={() => setStep(2)}>CORRIGIR PEDIDO</button>
+                                    <button className="btn-action" style={{width:'auto'}} onClick={enviarDados} disabled={isSubmitting}>
+                                        {isSubmitting ? 'REGISTRANDO...' : 'JÁ PAGUEI, ENVIAR E-MAIL'} <i className="material-icons align-middle ms-2">send</i>
+                                    </button>
                                 </div>
                             </div>
-                        </div>
-
-                        {/* ITENS INDIVIDUAIS */}
-                        <div className="col-md-6 mb-4">
-                            <div className="l-card h-100">
-                                <h4 className="text-gold"><i className="material-icons align-middle">shield</i> Itens Essenciais</h4>
-                                
-                                <div className="d-flex align-items-center gap-3 mt-4 mb-3">
-                                    <img src="https://eventos-mizraim.github.io/gestao/balaclava.jpeg" style={{width: '60px', height:'60px', objectFit:'cover', borderRadius:'50%'}} />
-                                    <div className="flex-grow-1">
-                                        <h6 className="m-0 text-white">Balaclava Tática</h6>
-                                        <small className="text-danger fw-bold">*Obrigatório mínimo 01</small>
-                                    </div>
-                                    <input type="number" className="form-control" style={{width: '80px'}} value={balaclava} onChange={handleBalaclava} min="1" />
-                                </div>
-
-                                <div className="d-flex align-items-center gap-3 mb-3">
-                                    <img src="https://eventos-mizraim.github.io/gestao/calca.jpeg" style={{width: '60px', height:'60px', objectFit:'cover', borderRadius:'50%'}} />
-                                    <div className="flex-grow-1">
-                                        <h6 className="m-0 text-white">Calça Ripstop</h6>
-                                        <small className="text-muted">Avulso</small>
-                                    </div>
-                                    <select className="form-select" style={{width: '90px'}}>
-                                        <option>38</option><option>40</option><option>42</option><option>44</option><option>46</option>
-                                    </select>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="text-center mt-3">
-                        <button className="btn btn-orange btn-lg px-5">FINALIZAR PEDIDO</button>
+                        )}
                     </div>
                 </div>
             );
         };
 
-        // 5. ADMIN AREA (COORDENAÇÃO)
-        const AdminPanel = ({ onLogout }) => {
-            return (
-                <div className="container py-4">
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h2 className="text-gold brand-font m-0">CENTRAL DE COMANDO</h2>
-                        <button className="btn btn-outline-danger btn-sm" onClick={onLogout}>SAIR</button>
-                    </div>
-
-                    <div className="row g-4">
-                        {SETORES.map((setor, idx) => (
-                            <div key={idx} className="col-md-6 col-lg-3">
-                                <div className="l-card h-100 text-center">
-                                    <div className="mb-3 text-orange">
-                                        <i className="material-icons" style={{fontSize: '3rem'}}>{setor.icon}</i>
-                                    </div>
-                                    <h4 className="text-white fw-bold">{setor.nome}</h4>
-                                    <p className="text-muted small">{setor.desc}</p>
-                                    <button className="btn btn-sm btn-outline-light w-100 mt-2">ACESSAR PAINEL</button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="mt-5 p-4 bg-dark border border-secondary rounded">
-                        <h5 className="text-white mb-3">📊 Resumo Operacional</h5>
-                        <div className="progress mb-3" style={{height: '25px', background: '#333'}}>
-                            <div className="progress-bar bg-gold text-dark fw-bold" role="progressbar" style={{width: '100%'}}>26 Inscritos (100%)</div>
-                        </div>
-                         <div className="progress" style={{height: '25px', background: '#333'}}>
-                            <div className="progress-bar bg-orange text-white fw-bold" role="progressbar" style={{width: '45%'}}>12 Kits Pagos</div>
-                        </div>
-                    </div>
+        // VIEW: ADMIN
+        const Admin = ({ setView }) => (
+            <div className="container py-5 fade-in">
+                <div className="d-flex justify-content-between mb-4">
+                    <h2 className="text-gold brand-font">COORDENAÇÃO</h2>
+                    <button className="btn btn-danger btn-sm" onClick={() => setView('home')}>SAIR</button>
                 </div>
-            );
-        };
-
-        // LOGIN MODAL (Simples)
-        const Login = ({ onSuccess, onCancel }) => {
-            const [user, setUser] = useState('');
-            const [pass, setPass] = useState('');
-
-            const handleLogin = (e) => {
-                e.preventDefault();
-                // Lógica simples pedida: Eventos / 1234
-                if(pass === '1234') {
-                    onSuccess();
-                } else {
-                    Swal.fire({icon: 'error', title: 'Acesso Negado', text: 'Senha incorreta', background: '#222', color: '#fff'});
-                }
-            }
-
-            return (
-                <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{background: 'rgba(0,0,0,0.9)', zIndex: 1000}}>
-                    <div className="l-card p-4" style={{width: '350px'}}>
-                        <h3 className="text-gold text-center mb-3">ÁREA RESTRITA</h3>
-                        <form onSubmit={handleLogin}>
-                            <div className="mb-3">
-                                <label className="text-white small">ÁREA/LOGIN</label>
-                                <input type="text" className="form-control text-uppercase" placeholder="EX: EVENTOS" value={user} onChange={e => setUser(e.target.value)} required />
-                            </div>
-                            <div className="mb-3">
-                                <label className="text-white small">SENHA</label>
-                                <input type="password" className="form-control" placeholder="****" value={pass} onChange={e => setPass(e.target.value)} required />
-                            </div>
-                            <button className="btn btn-orange w-100 mb-2">ENTRAR</button>
-                            <button type="button" className="btn btn-outline-secondary w-100" onClick={onCancel}>CANCELAR</button>
-                        </form>
-                    </div>
+                <div className="l-card text-center py-5">
+                    <i className="material-icons text-muted" style={{fontSize:'4rem'}}>table_view</i>
+                    <h4 className="text-white mt-3">Base de Dados</h4>
+                    <p className="text-muted">Acesse a Planilha Google para ver os inscritos em tempo real.</p>
+                    <a href="https://docs.google.com/spreadsheets" target="_blank" className="btn btn-outline-gold mt-2">ABRIR PLANILHA MESTRA</a>
                 </div>
-            );
-        };
+            </div>
+        );
 
-        // --- APP PRINCIPAL ---
+        // APP
         const App = () => {
-            const [view, setView] = useState('home'); // home, cadastro, loja, admin, admin_login
-            const [isLoggedIn, setIsLoggedIn] = useState(false);
+            const [view, setView] = useState('home');
 
-            const renderView = () => {
-                switch(view) {
-                    case 'home': return <Home />;
-                    case 'cadastro': return <FichaCadastro />;
-                    case 'loja': return <Loja />;
-                    case 'admin': return <AdminPanel onLogout={() => { setIsLoggedIn(false); setView('home'); }} />;
-                    case 'admin_login': 
-                        return <Login onSuccess={() => { setIsLoggedIn(true); setView('admin'); }} onCancel={() => setView('home')} />;
-                    default: return <Home />;
-                }
+            const handleAdminLogin = () => {
+                Swal.fire({
+                    title: 'ÁREA RESTRITA',
+                    background: '#111', color: '#fff',
+                    input: 'password', inputPlaceholder: 'Senha',
+                    confirmButtonColor: '#D4AF37',
+                    preConfirm: (pass) => { if(pass !== '1234') Swal.showValidationMessage('Senha Inválida'); }
+                }).then((res) => { if(res.isConfirmed) setView('admin'); });
             };
 
             return (
                 <div className="d-flex flex-column min-vh-100">
-                    <Header setView={setView} />
+                    <Header setView={setView} onAdminClick={handleAdminLogin} />
                     <main className="flex-grow-1">
-                        {renderView()}
+                        {view === 'home' && <Home setView={setView} />}
+                        {view === 'wizard' && <Wizard setView={setView} />}
+                        {view === 'admin' && <Admin setView={setView} />}
                     </main>
                     <footer className="text-center py-4 border-top border-secondary text-muted small">
-                        <p className="m-0">© 2025 LEGENDÁRIOS - MIZRAIM | LIMITE DUPLO...</p>
+                        <p className="m-0">© 2025 LEGENDÁRIOS - MIZRAIM | LIMITE DUPLO</p>
                     </footer>
                 </div>
             );
