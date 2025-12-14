@@ -231,7 +231,7 @@
         const AVISOS = [
             { id: 1, title: 'MISSÃO CUMPRIDA', date: '13.12', desc: 'Gratidão aos 27 homens que aceitaram o chamado.', important: true },
             { id: 2, title: 'PRAZO UNIFORMES', date: 'DOMINGO | 21.12', desc: 'Pedido obrigatório via sistema.', important: true },
-            { id: 3, title: 'Reunião Geral', date: 'EM BREVE JAN|2026', desc: 'Convocação será no Whatsapp.', important: false }
+            { id: 3, title: 'REUNIÃO GERAL', date: 'EM BREVE JAN|2026', desc: 'Convocação será no Whatsapp.', important: true }
         ];
 
         const PRODUCTS = [
@@ -429,7 +429,7 @@
                                     <h5 className={aviso.important ? "text-gold fw-bold brand-font" : "text-white fw-bold"}>{aviso.title}</h5>
                                     <span className="badge bg-secondary">{aviso.date}</span>
                                 </div>
-                                <p className="text-muted m-0 mt-2">{aviso.desc}</p>
+                                <p className="text-white m-0 mt-2">{aviso.desc}</p>
                             </div>
                         ))}
                     </div>
