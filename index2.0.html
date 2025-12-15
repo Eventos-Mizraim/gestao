@@ -217,6 +217,32 @@
         }
         @keyframes popIn { from {transform: scale(0);} to {transform: scale(1);} }
 
+        /* --- ESTILOS DE ERRO (AJUSTE SOLICITADO) --- */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .input-error {
+            border: 2px solid var(--orange) !important;
+            animation: shake 0.4s ease-in-out;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23FF4500'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23FF4500' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+        
+        .error-text {
+            color: var(--orange);
+            font-size: 0.75rem;
+            font-weight: 800;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
     </style>
 </head>
 <body>
@@ -349,8 +375,30 @@
         const ProductCard = ({ product, onAdd }) => {
             const [sizeTop, setSizeTop] = useState('');
             const [sizeBottom, setSizeBottom] = useState('');
+            const [errors, setErrors] = useState({ top: false, bottom: false });
 
             const handleAdd = () => {
+                // Validação
+                let newErrors = { top: false, bottom: false };
+                let hasError = false;
+
+                if (product.hasTopSize && !sizeTop) {
+                    newErrors.top = true;
+                    hasError = true;
+                }
+                if (product.hasBottomSize && !sizeBottom) {
+                    newErrors.bottom = true;
+                    hasError = true;
+                }
+
+                if (hasError) {
+                    setErrors(newErrors);
+                    // Remove o erro visualmente após 2 segundos
+                    setTimeout(() => setErrors({ top: false, bottom: false }), 3000);
+                    return;
+                }
+
+                // Se passou na validação
                 onAdd({
                     ...product,
                     selectedTop: product.hasTopSize ? sizeTop : null,
@@ -368,6 +416,10 @@
                 }, 1000);
             };
 
+            const clearError = (field) => {
+                setErrors(prev => ({ ...prev, [field]: false }));
+            };
+
             return (
                 <div className="col-md-6 col-lg-3 mb-4">
                     <div className="product-card">
@@ -381,13 +433,18 @@
                                 {product.hasTopSize && (
                                     <div className="mb-2">
                                         <div className="d-flex justify-content-between align-items-center mb-1">
-                                            <label className="text-white fw-bold small">Tamanho (Superior)</label>
+                                            <label className="text-white fw-bold small">Tamanho (2ª Pele)</label>
                                             <button type="button" className="btn-measure" onClick={() => showMeasurementModal('top')}>Medidas 2ª Pele</button>
                                         </div>
-                                        <select className="form-select form-select-sm" value={sizeTop} onChange={e => setSizeTop(e.target.value)}>
+                                        <select 
+                                            className={`form-select form-select-sm ${errors.top ? 'input-error' : ''}`} 
+                                            value={sizeTop} 
+                                            onChange={e => { setSizeTop(e.target.value); clearError('top'); }}
+                                        >
                                             <option value="">Selecione</option>
                                             {SIZES_TOP.map(s => <option key={s} value={s}>{s}</option>)}
                                         </select>
+                                        {errors.top && <div className="error-text fade-in"><i className="material-icons" style={{fontSize:'12px'}}>error</i> Selecione um tamanho</div>}
                                     </div>
                                 )}
                                 {product.hasBottomSize && (
@@ -396,23 +453,24 @@
                                             <label className="text-white fw-bold small">Tamanho (Calça)</label>
                                             <button type="button" className="btn-measure" onClick={() => showMeasurementModal('bottom')}>Medidas Calça</button>
                                         </div>
-                                        <select className="form-select form-select-sm" value={sizeBottom} onChange={e => setSizeBottom(e.target.value)}>
+                                        <select 
+                                            className={`form-select form-select-sm ${errors.bottom ? 'input-error' : ''}`} 
+                                            value={sizeBottom} 
+                                            onChange={e => { setSizeBottom(e.target.value); clearError('bottom'); }}
+                                        >
                                             <option value="">Selecione</option>
                                             {SIZES_BOTTOM.map(s => <option key={s} value={s}>{s}</option>)}
                                         </select>
+                                        {errors.bottom && <div className="error-text fade-in"><i className="material-icons" style={{fontSize:'12px'}}>error</i> Selecione um tamanho</div>}
                                     </div>
                                 )}
-<button
-    id={`btn-${product.id}`}
-    className="btn-add w-100 mt-2"
-    onClick={handleAdd}
-    disabled={
-        (product.hasTopSize && !sizeTop) ||
-        (product.hasBottomSize && !sizeBottom)
-    }
->
-    ADICIONAR <i className="material-icons align-middle" style={{fontSize:'16px'}}>add_shopping_cart</i>
-</button>
+                                <button
+                                    id={`btn-${product.id}`}
+                                    className="btn-add w-100 mt-2"
+                                    onClick={handleAdd}
+                                >
+                                    ADICIONAR <i className="material-icons align-middle" style={{fontSize:'16px'}}>add_shopping_cart</i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -755,7 +813,7 @@
                                     <h5 className="text-white border-bottom border-secondary pb-2 mb-3"><i className="material-icons align-middle text-gold">shopping_cart</i> RESUMO DO PEDIDO</h5>
                                     
                                     {cartItems.length === 0 ? (
-                                        <p className="text-muted text-center py-3">Seu carrinho está vazio.</p>
+                                        <p className="text-orange text-center py-3">Seu carrinho está vazio.</p>
                                     ) : (
                                         <div className="table-responsive">
                                             <table className="cart-table">
