@@ -411,7 +411,7 @@
         (product.hasBottomSize && !sizeBottom)
     }
 >
-    ADICIONAR <i className="material-icons align-middle" style={{fontSize:'16px'}}>ao_carrinho</i>
+    ADICIONAR <i className="material-icons align-middle" style={{fontSize:'16px'}}>add_shopping_cart</i>
 </button>
                             </div>
                         </div>
@@ -497,7 +497,14 @@
             const handleFile = (e) => {
                 const file = e.target.files[0];
                 if(file) {
-                     setFormData({...formData, certificado: file.name});
+                    // onde foi feito o ajuste: Validação de tamanho (4MB)
+                    if (file.size > 4 * 1024 * 1024) {
+                        Swal.fire('Erro', 'O arquivo é muito grande. Máximo 4MB.', 'error');
+                        e.target.value = '';
+                        return;
+                    }
+                    // onde foi feito o ajuste: Salva o objeto File para processamento
+                    setFormData({...formData, certificado: file});
                 }
             };
 
@@ -533,13 +540,50 @@
                 return true;
             };
 
+            // UTILS: CONVERSÃO DE ARQUIVO PARA BASE64
+            // onde foi feito o ajuste: Função auxiliar para converter arquivo
+            const fileToBase64 = (file) => {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => {
+                        const content = reader.result.split(',')[1]; 
+                        resolve({
+                            content: content,
+                            mimeType: file.type,
+                            fileName: file.name
+                        });
+                    };
+                    reader.onerror = error => reject(error);
+                });
+            };
+
             // FUNÇÕES STEP 3 & 4 (ENVIO E RESET)
             const enviarDados = async () => {
                 setIsSubmitting(true);
                 const wppLink = `https://wa.me/55${formData.telefone.replace(/\D/g, '')}`; 
                 
+                // onde foi feito o ajuste: Preparação do arquivo para envio (Base64)
+                let filePayload = null;
+                if (formData.curso === 'sim' && formData.certificado) {
+                    try {
+                        filePayload = await fileToBase64(formData.certificado);
+                    } catch (err) {
+                        console.error("Erro ao ler arquivo", err);
+                        Swal.fire('Erro', 'Falha ao processar o certificado.', 'error');
+                        setIsSubmitting(false);
+                        return;
+                    }
+                }
+
                 const payload = { 
                     ...formData,
+                    // onde foi feito o ajuste: Dados do arquivo processado
+                    certificado: null, 
+                    fileData: filePayload ? filePayload.content : null,
+                    mimeType: filePayload ? filePayload.mimeType : null,
+                    fileName: filePayload ? filePayload.fileName : null,
+
                     contato_whatsapp: wppLink, 
                     carrinho: cartItems.map(i => `${i.name} (${i.selectedTop || ''} ${i.selectedBottom || ''})`).join(', '), 
                     total: cartTotal.toFixed(2), 
